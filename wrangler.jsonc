@@ -1,0 +1,20 @@
+﻿{
+  "name": "origem-api",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-04-02",
+  "workers_dev": true,
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "IP_RATE_LIMITER",
+        "class_name": "IpRateLimiter"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["IpRateLimiter"]
+    }
+  ]
+}

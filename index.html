@@ -1,0 +1,182 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Plataforma para detectar se uma imagem foi feita por IA e verificar se uma noticia parece verdadeira ou falsa a partir de um link."
+    />
+    <title>Origem | Imagem e Fonte</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="config.js?v=3"></script>
+    <script src="script.js?v=3" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand-wrap">
+        <a class="brand" href="#top">Origem</a>
+      </div>
+
+      <nav class="site-nav" aria-label="Navegacao principal">
+        <a href="#imagem">Imagem</a>
+        <a href="#fonte">Fonte</a>
+        <a href="#como-usar">Como Usar</a>
+        <a href="https://www.naveavela.com.br/hackanav/" target="_blank" rel="noreferrer">HackaNav</a>
+      </nav>
+
+      <a class="header-link" href="https://www.naveavela.com.br/hackanav/" target="_blank" rel="noreferrer">
+        Site do HackaNav
+      </a>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <p class="hero-kicker">Analise em dois fluxos</p>
+        <h1>Descubra se a imagem parece feita por IA e se a noticia parece verdadeira.</h1>
+        <p class="hero-copy">
+          A plataforma separa a leitura visual da imagem e a verificacao da noticia por link,
+          com veredito e pontos principais da analise.
+        </p>
+      </section>
+
+      <section class="tool-shell" aria-labelledby="analise-title">
+        <div class="tool-head">
+          <div>
+            <p class="section-kicker">Painel principal</p>
+            <h2 id="analise-title">Escolha o tipo de analise</h2>
+          </div>
+          <div class="tool-tabs" role="tablist" aria-label="Tipos de analise">
+            <button class="tool-tab is-active" type="button" data-tab-button="imagem" role="tab" aria-selected="true">
+              Imagem
+            </button>
+            <button class="tool-tab" type="button" data-tab-button="fonte" role="tab" aria-selected="false">
+              Fonte
+            </button>
+          </div>
+        </div>
+
+        <div class="tool-panel is-active" id="imagem" data-tab-panel="imagem" role="tabpanel">
+          <div class="input-layout">
+            <section class="input-area">
+              <label class="field-label" for="image-input">Enviar imagem</label>
+              <label class="upload-box" id="upload-box" for="image-input">
+                <input id="image-input" type="file" accept="image/*" />
+                <span class="upload-title">Clique para carregar uma imagem</span>
+                <span class="upload-subtitle">A IA vai observar detalhes visuais, consistencia e sinais de geracao.</span>
+              </label>
+
+              <div class="preview-box" id="image-preview" aria-live="polite">
+                <div class="empty-state">
+                  <strong>Nenhuma imagem enviada</strong>
+                  <p>A visualizacao do arquivo aparece aqui.</p>
+                </div>
+              </div>
+
+              <button class="primary-button" id="analyze-image-button" type="button">
+                Analisar imagem
+              </button>
+              <p class="helper-note" id="image-helper-note">Esse fluxo analisa somente a imagem enviada.</p>
+              <p class="feedback-message" id="image-message" aria-live="polite"></p>
+            </section>
+
+            <aside class="result-area">
+              <div class="result-card">
+                <div class="result-topline">
+                  <h3>Resultado da imagem</h3>
+                  <span class="result-badge is-neutral" id="image-badge">Aguardando</span>
+                </div>
+                <p class="result-label" id="image-label">Nenhum arquivo recebido ainda.</p>
+                <p class="result-text" id="image-text">
+                  Envie uma imagem para ver o retorno desta analise.
+                </p>
+                <ul class="result-points" id="image-points">
+                  <li>A analise visual vai apontar os detalhes principais aqui.</li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <div class="tool-panel" id="fonte" data-tab-panel="fonte" role="tabpanel">
+          <div class="input-layout">
+            <section class="input-area">
+              <label class="field-label" for="source-input">Cole o link da noticia ou publicacao</label>
+              <input
+                class="text-input"
+                id="source-input"
+                type="url"
+                placeholder="https://site.com/noticia-ou-publicacao"
+                inputmode="url"
+              />
+
+              <button class="primary-button" id="analyze-source-button" type="button">
+                Verificar fonte
+              </button>
+              <p class="helper-note" id="source-helper-note">Esse fluxo le o link, extrai a pagina e compara a noticia com outras referencias.</p>
+              <p class="feedback-message" id="source-message" aria-live="polite"></p>
+            </section>
+
+            <aside class="result-area">
+              <div class="result-card">
+                <div class="result-topline">
+                  <h3>Resultado da fonte</h3>
+                  <span class="result-badge is-neutral" id="source-badge">Aguardando</span>
+                </div>
+                <p class="result-label" id="source-label">Nenhum link enviado ainda.</p>
+                <p class="result-text" id="source-text">
+                  Cole um link para ver o retorno desta analise.
+                </p>
+                <ul class="result-points" id="source-points">
+                  <li>A verificacao da noticia vai resumir os pontos principais aqui.</li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="how-it-works" id="como-usar">
+        <div class="section-head center">
+          <p class="section-kicker">Como usar</p>
+          <h2>Direto ao ponto</h2>
+        </div>
+
+        <div class="steps-grid">
+          <article class="step-card">
+            <span>01</span>
+            <h3>Escolha a analise</h3>
+            <p>Use a aba Imagem para detectar sinais de IA ou a aba Fonte para verificar se a noticia parece verdadeira.</p>
+          </article>
+          <article class="step-card">
+            <span>02</span>
+            <h3>Envie o conteudo</h3>
+            <p>Carregue a imagem ou cole o link que voce quer analisar.</p>
+          </article>
+          <article class="step-card">
+            <span>03</span>
+            <h3>Leia o veredito</h3>
+            <p>O sistema devolve status e os principais pontos usados na resposta.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="bottom-banner">
+        <div>
+          <p class="section-kicker">HackaNav</p>
+          <h2>Projeto pensado para o desafio de desinformacao digital.</h2>
+        </div>
+        <a class="primary-button link-button" href="https://www.naveavela.com.br/hackanav/" target="_blank" rel="noreferrer">
+          Acessar site do HackaNav
+        </a>
+      </section>
+    </main>
+  </body>
+</html>
+
