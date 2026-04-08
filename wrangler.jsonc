@@ -1,6 +1,6 @@
-﻿{
+{
   "name": "origem-api",
-  "main": "worker/index.js",
+  "main": "index.js",
   "compatibility_date": "2026-04-02",
   "workers_dev": true,
   "durable_objects": {
