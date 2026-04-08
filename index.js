@@ -1,32 +1,67 @@
-﻿const CORS_HEADERS = {
+const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST,OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type"
 };
 
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
-const DEFAULT_MODEL = "gemini-2.5-flash-lite";
+const DEFAULT_MODEL = "gemini-2.5-flash";
 const DEFAULT_IMAGE_DAILY_LIMIT = 100;
 const DEFAULT_SOURCE_DAILY_LIMIT = 50;
+const DEFAULT_BOT_DAILY_LIMIT = 80;
+const DEFAULT_AUDIO_DAILY_LIMIT = 60;
+const DEFAULT_VIDEO_DAILY_LIMIT = 40;
 const PROVIDER_RESET_TIME_ZONE = "America/Los_Angeles";
+const GEMINI_QUOTA_COOLDOWN_MS = 30 * 60 * 1000;
+const GEMINI_INVALID_KEY_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
-const IMAGE_SCHEMA = {
-  type: "OBJECT",
+let nextGeminiKeyIndex = 0;
+const geminiKeyCooldowns = new Map();
+
+const MEDIA_SCHEMA = {
+  type: "object",
   properties: {
     verdict: {
-      type: "STRING",
-      enum: ["feita_por_ia", "parece_real", "inconclusiva"]
+      type: "string",
+      enum: ["ia", "autentico", "inconclusivo"]
     },
     confidence: {
-      type: "INTEGER"
+      type: "integer",
+      minimum: 0,
+      maximum: 100
     },
     summary: {
-      type: "STRING"
+      type: "string"
     },
     signals: {
-      type: "ARRAY",
+      type: "array",
       items: {
-        type: "STRING"
+        type: "string"
+      }
+    }
+  },
+  required: ["verdict", "confidence", "summary", "signals"]
+};
+
+const BOT_SCHEMA = {
+  type: "object",
+  properties: {
+    verdict: {
+      type: "string",
+      enum: ["bot", "humano", "inconclusivo"]
+    },
+    confidence: {
+      type: "integer",
+      minimum: 0,
+      maximum: 100
+    },
+    summary: {
+      type: "string"
+    },
+    signals: {
+      type: "array",
+      items: {
+        type: "string"
       }
     }
   },
@@ -34,22 +69,24 @@ const IMAGE_SCHEMA = {
 };
 
 const SOURCE_SCHEMA = {
-  type: "OBJECT",
+  type: "object",
   properties: {
     verdict: {
-      type: "STRING",
+      type: "string",
       enum: ["verdadeira", "falsa", "inconclusiva"]
     },
     confidence: {
-      type: "INTEGER"
+      type: "integer",
+      minimum: 0,
+      maximum: 100
     },
     summary: {
-      type: "STRING"
+      type: "string"
     },
     reasons: {
-      type: "ARRAY",
+      type: "array",
       items: {
-        type: "STRING"
+        type: "string"
       }
     }
   },
@@ -58,11 +95,41 @@ const SOURCE_SCHEMA = {
 
 const IMAGE_SYSTEM_PROMPT = [
   "Voce e um analista de autenticidade visual.",
-  "Decida se a imagem parece feita por IA, parece real ou se e inconclusiva.",
-  "Observe detalhes como maos, dedos, olhos, texto na imagem, reflexos, sombras, perspectiva, repeticao de textura, objetos deformados e incoerencias de contorno.",
-  "O campo confidence deve ser um numero inteiro de 0 a 100.",
-  "Use 0 a 30 para evidencia fraca, 31 a 69 para caso misto e 70 a 100 para evidencia forte.",
-  "Se a evidencia nao bastar, use inconclusiva.",
+  "Classifique a imagem em ia, autentico ou inconclusivo.",
+  "Observe textura, maos, olhos, sombras, reflexos, perspectiva, texto, repeticao, recortes, contornos e coerencia espacial.",
+  "confidence deve ser inteiro entre 0 e 100.",
+  "signals deve listar de 3 a 5 sinais curtos e objetivos.",
+  "summary deve explicar a decisao em portugues claro.",
+  "Retorne apenas o JSON pedido."
+].join(" ");
+
+const AUDIO_SYSTEM_PROMPT = [
+  "Voce e um analista forense de audio e musica.",
+  "Classifique o arquivo em ia, autentico ou inconclusivo.",
+  "Observe naturalidade do timbre, respiracao, transientes, repeticao, looping, ambiencia, ruido, colagens, artefatos espectrais, voz, instrumentacao e mixagem.",
+  "confidence deve ser inteiro entre 0 e 100.",
+  "signals deve listar de 3 a 5 sinais curtos e objetivos.",
+  "summary deve explicar a decisao em portugues claro.",
+  "Retorne apenas o JSON pedido."
+].join(" ");
+
+const VIDEO_SYSTEM_PROMPT = [
+  "Voce e um analista forense de video.",
+  "Classifique o video em ia, autentico ou inconclusivo.",
+  "Observe consistencia temporal, labios, olhos, pele, reflexos, luz, sombras, fisica da cena, repeticoes, interpolacao, deformacoes e transicoes suspeitas.",
+  "confidence deve ser inteiro entre 0 e 100.",
+  "signals deve listar de 3 a 5 sinais curtos e objetivos.",
+  "summary deve explicar a decisao em portugues claro.",
+  "Retorne apenas o JSON pedido."
+].join(" ");
+
+const BOT_SYSTEM_PROMPT = [
+  "Voce e um analista de autenticidade de perfis e contas online.",
+  "Classifique a conta em bot, humano ou inconclusivo.",
+  "Considere padrao do handle, excesso de numeros, legibilidade, aleatoriedade, rota do perfil, sinais de automacao e indicios de conta canonica.",
+  "confidence deve ser inteiro entre 0 e 100.",
+  "signals deve listar de 3 a 5 sinais curtos e objetivos.",
+  "summary deve explicar a decisao em portugues claro.",
   "Retorne apenas o JSON pedido."
 ].join(" ");
 
@@ -100,8 +167,10 @@ export default {
       return jsonResponse({ ok: true, service: "origem-api", provider: "gemini" });
     }
 
-    if (!env.GEMINI_API_KEY) {
-      return jsonResponse({ error: "GEMINI_API_KEY nao configurada no backend." }, 500);
+    if (!getGeminiApiKeys(env).length) {
+      return jsonResponse({
+        error: "GEMINI_API_KEY nao configurada no backend. Defina GEMINI_API_KEYS ou GEMINI_API_KEY."
+      }, 500);
     }
 
     try {
@@ -117,7 +186,85 @@ export default {
           return rateLimitResponse;
         }
 
-        return await handleImageAnalysis(request, env);
+        return await handleMediaAnalysis(request, env, {
+          scope: "image",
+          fieldName: "image",
+          label: "Imagem",
+          prompt: IMAGE_SYSTEM_PROMPT,
+          schema: MEDIA_SCHEMA,
+          model: env.GEMINI_IMAGE_MODEL || DEFAULT_MODEL,
+          maxSizeBytes: 8 * 1024 * 1024,
+          expectedMimePrefix: "image/",
+          defaultMimeType: "image/jpeg",
+          userPrompt: "Analise esta imagem e devolva apenas o JSON solicitado."
+        });
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/analyze-audio") {
+        const rateLimitResponse = await enforceRateLimit(
+          request,
+          env,
+          "audio",
+          getDailyLimit(env.AUDIO_DAILY_LIMIT, DEFAULT_AUDIO_DAILY_LIMIT)
+        );
+
+        if (rateLimitResponse) {
+          return rateLimitResponse;
+        }
+
+        return await handleMediaAnalysis(request, env, {
+          scope: "audio",
+          fieldName: "audio",
+          label: "Musica",
+          prompt: AUDIO_SYSTEM_PROMPT,
+          schema: MEDIA_SCHEMA,
+          model: env.GEMINI_AUDIO_MODEL || DEFAULT_MODEL,
+          maxSizeBytes: 20 * 1024 * 1024,
+          expectedMimePrefix: "audio/",
+          defaultMimeType: "audio/mpeg",
+          userPrompt: "Analise este audio ou musica e devolva apenas o JSON solicitado."
+        });
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/analyze-video") {
+        const rateLimitResponse = await enforceRateLimit(
+          request,
+          env,
+          "video",
+          getDailyLimit(env.VIDEO_DAILY_LIMIT, DEFAULT_VIDEO_DAILY_LIMIT)
+        );
+
+        if (rateLimitResponse) {
+          return rateLimitResponse;
+        }
+
+        return await handleMediaAnalysis(request, env, {
+          scope: "video",
+          fieldName: "video",
+          label: "Video",
+          prompt: VIDEO_SYSTEM_PROMPT,
+          schema: MEDIA_SCHEMA,
+          model: env.GEMINI_VIDEO_MODEL || DEFAULT_MODEL,
+          maxSizeBytes: 20 * 1024 * 1024,
+          expectedMimePrefix: "video/",
+          defaultMimeType: "video/mp4",
+          userPrompt: "Analise este video e devolva apenas o JSON solicitado."
+        });
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/analyze-bot") {
+        const rateLimitResponse = await enforceRateLimit(
+          request,
+          env,
+          "bot",
+          getDailyLimit(env.BOT_DAILY_LIMIT, DEFAULT_BOT_DAILY_LIMIT)
+        );
+
+        if (rateLimitResponse) {
+          return rateLimitResponse;
+        }
+
+        return await handleBotAnalysis(request, env);
       }
 
       if (request.method === "POST" && url.pathname === "/api/analyze-source") {
@@ -142,26 +289,26 @@ export default {
   }
 };
 
-async function handleImageAnalysis(request, env) {
+async function handleMediaAnalysis(request, env, config) {
   const formData = await request.formData();
-  const file = formData.get("image");
+  const file = formData.get(config.fieldName);
 
   if (!file || typeof file.arrayBuffer !== "function") {
-    return jsonResponse({ error: "Envie uma imagem valida." }, 400);
+    return jsonResponse({ error: `Envie um arquivo valido de ${config.label.toLowerCase()}.` }, 400);
   }
 
-  if (!String(file.type || "").startsWith("image/")) {
-    return jsonResponse({ error: "O arquivo precisa ser uma imagem." }, 400);
+  if (!String(file.type || "").startsWith(config.expectedMimePrefix)) {
+    return jsonResponse({ error: `O arquivo precisa ser um ${config.label.toLowerCase()}.` }, 400);
   }
 
-  if (file.size > 8 * 1024 * 1024) {
-    return jsonResponse({ error: "A imagem deve ter no maximo 8 MB." }, 400);
+  if (file.size > config.maxSizeBytes) {
+    return jsonResponse({ error: `${config.label} deve ter no maximo ${formatBytes(config.maxSizeBytes)}.` }, 400);
   }
 
   const base64 = arrayBufferToBase64(await file.arrayBuffer());
-  const response = await callGemini(env.GEMINI_API_KEY, env.GEMINI_IMAGE_MODEL || DEFAULT_MODEL, {
+  const response = await callGemini(env, config.model, {
     systemInstruction: {
-      parts: [{ text: IMAGE_SYSTEM_PROMPT }]
+      parts: [{ text: config.prompt }]
     },
     contents: [
       {
@@ -169,30 +316,75 @@ async function handleImageAnalysis(request, env) {
         parts: [
           {
             inlineData: {
-              mimeType: file.type || "image/jpeg",
+              mimeType: file.type || config.defaultMimeType,
               data: base64
             }
           },
           {
-            text: "Analise esta imagem e devolva apenas o JSON solicitado."
+            text: config.userPrompt
           }
         ]
       }
     ],
     generationConfig: {
       responseMimeType: "application/json",
-      responseSchema: IMAGE_SCHEMA,
+      responseJsonSchema: config.schema,
       temperature: 0.2
     }
   });
 
   const analysis = parseGeminiJson(response);
-  const verdictMap = mapImageVerdict(analysis.verdict);
+  const verdictMap = mapMediaVerdict(analysis.verdict);
 
   return jsonResponse({
     status: verdictMap.status,
     badgeClass: verdictMap.badgeClass,
-    label: `${file.name} - ${formatBytes(file.size)}`,
+    label: `${config.label}: ${file.name} - ${formatBytes(file.size)}`,
+    confidence: normalizeConfidence(analysis.confidence),
+    text: analysis.summary,
+    points: normalizeList(analysis.signals)
+  });
+}
+
+async function handleBotAnalysis(request, env) {
+  const body = await request.json().catch(() => null);
+  const value = String(body?.value || body?.link || "").trim();
+
+  if (!value) {
+    return jsonResponse({ error: "Envie um link, handle ou identificador para verificar o bot." }, 400);
+  }
+
+  const response = await callGemini(env, env.GEMINI_BOT_MODEL || DEFAULT_MODEL, {
+    systemInstruction: {
+      parts: [{ text: BOT_SYSTEM_PROMPT }]
+    },
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text: [
+              "Analise o perfil abaixo e devolva apenas o JSON pedido.",
+              `Perfil ou handle: ${value}`
+            ].join("\n\n")
+          }
+        ]
+      }
+    ],
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseJsonSchema: BOT_SCHEMA,
+      temperature: 0.1
+    }
+  });
+
+  const analysis = parseGeminiJson(response);
+  const verdictMap = mapBotVerdict(analysis.verdict);
+
+  return jsonResponse({
+    status: verdictMap.status,
+    badgeClass: verdictMap.badgeClass,
+    label: "Perfil analisado",
     confidence: normalizeConfidence(analysis.confidence),
     text: analysis.summary,
     points: normalizeList(analysis.signals)
@@ -211,7 +403,7 @@ async function handleSourceAnalysis(request, env) {
   const pageData = await fetchPageSnapshot(normalizedUrl);
   const model = env.GEMINI_SOURCE_MODEL || DEFAULT_MODEL;
 
-  const groundedResponse = await callGemini(env.GEMINI_API_KEY, model, {
+  const groundedResponse = await callGemini(env, model, {
     systemInstruction: {
       parts: [{ text: SOURCE_GROUNDED_PROMPT }]
     },
@@ -234,7 +426,7 @@ async function handleSourceAnalysis(request, env) {
   const groundedText = getGeminiText(groundedResponse);
   const groundingMeta = getGroundingMetadata(groundedResponse);
 
-  const classifierResponse = await callGemini(env.GEMINI_API_KEY, model, {
+  const classifierResponse = await callGemini(env, model, {
     systemInstruction: {
       parts: [{ text: SOURCE_CLASSIFIER_PROMPT }]
     },
@@ -246,7 +438,7 @@ async function handleSourceAnalysis(request, env) {
     ],
     generationConfig: {
       responseMimeType: "application/json",
-      responseSchema: SOURCE_SCHEMA,
+      responseJsonSchema: SOURCE_SCHEMA,
       temperature: 0.1
     }
   });
@@ -291,72 +483,148 @@ async function enforceRateLimit(request, env, scope, limit) {
 
   const remaining = Number.isFinite(Number(data?.remaining)) ? Number(data.remaining) : 0;
   const resetLabel = "04:00 no horario de Brasilia";
-  const scopeLabel = scope === "source" ? "fonte" : "imagem";
+  const scopeLabels = {
+    image: "imagem",
+    source: "fonte",
+    bot: "bot",
+    audio: "musica",
+    video: "video"
+  };
 
   return jsonResponse({
-    error: `Limite diario por IP atingido para analise de ${scopeLabel}. Tente novamente apos ${resetLabel}.`,
+    error: `Limite diario por IP atingido para analise de ${scopeLabels[scope] || scope}. Tente novamente apos ${resetLabel}.`,
     limit,
     remaining
   }, 429);
 }
 
-async function callGemini(apiKey, model, payload) {
-  const response = await fetch(`${GEMINI_API_BASE}/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
+async function callGemini(env, model, payload) {
+  const configuredKeys = getGeminiApiKeys(env);
 
-  const data = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new Error(extractGeminiError(data));
+  if (!configuredKeys.length) {
+    throw new Error("Nenhuma chave Gemini configurada no backend.");
   }
 
-  return data;
+  const orderedKeys = getGeminiKeyOrder(configuredKeys);
+  let lastErrorMessage = "Falha ao consultar a API Gemini.";
+
+  for (const apiKey of orderedKeys) {
+    let response;
+
+    try {
+      response = await fetch(`${GEMINI_API_BASE}/${model}:generateContent`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": apiKey
+        },
+        body: JSON.stringify(payload)
+      });
+    } catch (error) {
+      throw new Error("Nao foi possivel conectar a API Gemini.");
+    }
+
+    const data = await response.json().catch(() => null);
+
+    if (response.ok) {
+      markGeminiKeySuccess(apiKey, configuredKeys);
+      return data;
+    }
+
+    const interpretedError = interpretGeminiError(data);
+    lastErrorMessage = interpretedError.message;
+
+    if (!interpretedError.shouldRotate || orderedKeys.length === 1) {
+      throw new Error(interpretedError.message);
+    }
+
+    markGeminiKeyCooldown(apiKey, interpretedError.cooldownMs);
+  }
+
+  throw new Error(lastErrorMessage);
 }
 
-function extractGeminiError(data) {
+function interpretGeminiError(data) {
   const message = data?.error?.message || "Falha ao consultar a API Gemini.";
 
   if (message.includes("API key not valid")) {
-    return "A chave do Gemini e invalida. Gere uma nova chave no Google AI Studio.";
+    return {
+      message: "Uma das chaves do Gemini e invalida. Trocando para a proxima chave configurada.",
+      shouldRotate: true,
+      cooldownMs: GEMINI_INVALID_KEY_COOLDOWN_MS
+    };
   }
 
   if (message.includes("quota") || message.includes("Quota") || message.includes("RESOURCE_EXHAUSTED")) {
-    return "A cota gratuita do Gemini foi excedida. Espere o reset da cota ou use outra chave/projeto.";
+    return {
+      message: "A cota gratuita do Gemini foi excedida para a chave atual. Tentando outra chave configurada.",
+      shouldRotate: true,
+      cooldownMs: GEMINI_QUOTA_COOLDOWN_MS
+    };
   }
 
-  return message;
+  if (message.includes("API_KEY_SERVICE_BLOCKED") || message.includes("permission") || message.includes("PERMISSION_DENIED")) {
+    return {
+      message: "Uma das chaves do Gemini nao tem permissao para este modelo ou metodo. Trocando para a proxima chave.",
+      shouldRotate: true,
+      cooldownMs: GEMINI_INVALID_KEY_COOLDOWN_MS
+    };
+  }
+
+  return {
+    message,
+    shouldRotate: false,
+    cooldownMs: 0
+  };
 }
 
 function parseGeminiJson(response) {
   const rawText = getGeminiText(response);
 
-  if (!rawText) {
-    throw new Error("O Gemini nao retornou conteudo parseavel.");
-  }
-
   try {
-    return JSON.parse(rawText);
+    return JSON.parse(extractJsonPayload(rawText));
   } catch (error) {
     throw new Error("Nao foi possivel interpretar a resposta JSON do Gemini.");
   }
 }
 
-function getGeminiText(response) {
-  const parts = response?.candidates?.[0]?.content?.parts;
+function extractJsonPayload(rawText) {
+  const fencedMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)```/i);
 
-  if (!Array.isArray(parts)) {
+  if (fencedMatch?.[1]) {
+    return fencedMatch[1].trim();
+  }
+
+  const firstBrace = rawText.indexOf("{");
+  const lastBrace = rawText.lastIndexOf("}");
+
+  if (firstBrace >= 0 && lastBrace > firstBrace) {
+    return rawText.slice(firstBrace, lastBrace + 1);
+  }
+
+  return rawText.trim();
+}
+
+function getGeminiText(response, options = {}) {
+  const candidate = response?.candidates?.[0];
+  const parts = candidate?.content?.parts;
+
+  if (Array.isArray(parts)) {
+    const text = parts
+      .map((part) => part?.text || "")
+      .join("\n")
+      .trim();
+
+    if (text) {
+      return text;
+    }
+  }
+
+  if (options.allowEmpty) {
     return "";
   }
 
-  return parts
-    .map((part) => part?.text || "")
-    .join("\n")
-    .trim();
+  throw new Error(extractGeminiCandidateError(response));
 }
 
 function getGroundingMetadata(response) {
@@ -375,6 +643,31 @@ function getGroundingMetadata(response) {
     .slice(0, 3);
 }
 
+function extractGeminiCandidateError(response) {
+  const blockReason = response?.promptFeedback?.blockReason;
+
+  if (blockReason) {
+    return `O Gemini bloqueou a solicitacao antes de gerar resposta (${String(blockReason).toLowerCase()}).`;
+  }
+
+  const candidate = response?.candidates?.[0];
+  const finishReason = candidate?.finishReason;
+
+  if (finishReason === "SAFETY") {
+    return "O Gemini bloqueou a resposta por politica de seguranca.";
+  }
+
+  if (finishReason === "MAX_TOKENS") {
+    return "O Gemini interrompeu a resposta antes de concluir o JSON esperado.";
+  }
+
+  if (finishReason) {
+    return `O Gemini encerrou a resposta sem conteudo utilizavel (${String(finishReason).toLowerCase()}).`;
+  }
+
+  return "O Gemini nao retornou conteudo utilizavel.";
+}
+
 function normalizeConfidence(value) {
   const numeric = Number(value);
 
@@ -391,6 +684,84 @@ function normalizeConfidence(value) {
   }
 
   return Math.max(0, Math.min(100, Math.round(numeric)));
+}
+
+function getGeminiApiKeys(env) {
+  const rawValues = [env.GEMINI_API_KEYS, env.GEMINI_API_KEY]
+    .filter((value) => typeof value === "string" && value.trim());
+
+  const parsedKeys = rawValues.flatMap((value) => parseGeminiKeyValue(value));
+  return [...new Set(parsedKeys)];
+}
+
+function parseGeminiKeyValue(rawValue) {
+  const trimmed = String(rawValue || "").trim();
+
+  if (!trimmed) {
+    return [];
+  }
+
+  if (trimmed.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map((item) => String(item || "").trim())
+          .filter(Boolean);
+      }
+    } catch (error) {
+      // Fall back to line/comma parsing below.
+    }
+  }
+
+  return trimmed
+    .split(/[\r\n,]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function getGeminiKeyOrder(keys) {
+  if (!keys.length) {
+    return [];
+  }
+
+  const rotated = [];
+
+  for (let index = 0; index < keys.length; index += 1) {
+    rotated.push(keys[(nextGeminiKeyIndex + index) % keys.length]);
+  }
+
+  const now = Date.now();
+  const available = [];
+  const coolingDown = [];
+
+  for (const key of rotated) {
+    const cooldownUntil = geminiKeyCooldowns.get(key) || 0;
+
+    if (cooldownUntil > now) {
+      coolingDown.push(key);
+      continue;
+    }
+
+    available.push(key);
+  }
+
+  return [...available, ...coolingDown];
+}
+
+function markGeminiKeySuccess(apiKey, configuredKeys) {
+  geminiKeyCooldowns.delete(apiKey);
+
+  const successfulIndex = configuredKeys.indexOf(apiKey);
+
+  if (successfulIndex >= 0) {
+    nextGeminiKeyIndex = (successfulIndex + 1) % configuredKeys.length;
+  }
+}
+
+function markGeminiKeyCooldown(apiKey, cooldownMs) {
+  geminiKeyCooldowns.set(apiKey, Date.now() + cooldownMs);
 }
 
 function getDailyLimit(rawValue, fallback) {
@@ -422,23 +793,44 @@ function mergeReasonsWithSources(reasons, sources) {
   return [...normalizedReasons, ...sourceLines].slice(0, 5);
 }
 
-function mapImageVerdict(verdict) {
-  if (verdict === "feita_por_ia") {
+function mapMediaVerdict(verdict) {
+  if (verdict === "ia") {
     return {
-      status: "Feita por IA",
+      status: "IA",
       badgeClass: "is-warn"
     };
   }
 
-  if (verdict === "parece_real") {
+  if (verdict === "autentico") {
     return {
-      status: "Parece real",
+      status: "Autentico",
       badgeClass: "is-ok"
     };
   }
 
   return {
-    status: "Inconclusiva",
+    status: "Inconclusivo",
+    badgeClass: "is-demo"
+  };
+}
+
+function mapBotVerdict(verdict) {
+  if (verdict === "bot") {
+    return {
+      status: "Bot",
+      badgeClass: "is-warn"
+    };
+  }
+
+  if (verdict === "humano") {
+    return {
+      status: "Humano",
+      badgeClass: "is-ok"
+    };
+  }
+
+  return {
+    status: "Inconclusivo",
     badgeClass: "is-demo"
   };
 }
@@ -698,4 +1090,3 @@ function jsonDurableResponse(data, status = 200) {
     }
   });
 }
-
