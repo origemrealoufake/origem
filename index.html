@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Origem e uma plataforma com estetica Frutiger Aero para verificar imagem, fonte, bot, musica e video."
+      content="Origem e um site simples pra checar noticia, imagem, audio, video e perfil suspeito."
     />
     <title>Origem | Plataforma de Verificacao</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=28" />
     <script src="config.js?v=24"></script>
     <script src="script.js?v=24" defer></script>
   </head>
@@ -32,15 +32,15 @@
         <span class="brand-mark">O</span>
         <span class="brand-copy">
           <strong>Origem</strong>
-          <small>Painel Frutiger Aero</small>
+          <small>checa antes</small>
         </span>
       </a>
 
       <nav class="site-nav" aria-label="Navegacao principal">
+        <a href="index.html">Inicio</a>
         <a href="#recursos">Recursos</a>
-        <a href="#fluxo">Fluxo</a>
-        <a href="#porque">Porque usar</a>
-        <a href="verificacao.html">Verificacao</a>
+        <a href="proposta.html">Proposta</a>
+        <a href="verificacao.html">Painel</a>
       </nav>
 
       <a class="header-cta" href="verificacao.html">Abrir painel</a>
@@ -49,16 +49,15 @@
     <main class="page-shell">
       <section class="hero hero-home">
         <div class="hero-copy-card glossy-panel">
-          <p class="hero-kicker">Frutiger Aero + verificacao</p>
-          <h1>Leia sinais de IA em imagem, fonte, bot, musica e video num painel so.</h1>
+          <p class="hero-kicker">Checagem simples</p>
+          <h1>Um jeito facil de conferir noticia, midia e perfil suspeito.</h1>
           <p class="hero-copy">
-            A Origem cruza leitura visual, checagem de noticia, suspeita de automacao e autenticidade de audio e video
-            em uma experiencia clara, brilhante e inspirada no visual aero classico.
+            A Origem junta o basico em um lugar so. Voce escolhe a area, envia o arquivo ou o link e confere o retorno.
           </p>
 
           <div class="hero-actions">
-            <a class="primary-button" href="verificacao.html">Comecar verificacao</a>
-            <a class="secondary-button" href="#recursos">Ver recursos</a>
+            <a class="primary-button" href="verificacao.html">Abrir painel</a>
+            <a class="secondary-button" href="proposta.html">Ver proposta</a>
           </div>
 
           <div class="hero-pills" aria-label="Resumo de capacidades">
@@ -75,20 +74,20 @@
             <div class="screen-orb"></div>
             <div class="screen-grid">
               <article>
-                <strong>5</strong>
-                <span>Fluxos de analise</span>
+                <strong>1 painel</strong>
+                <span>pra checar imagem, fonte, bot, musica e video</span>
               </article>
               <article>
-                <strong>IA</strong>
-                <span>Leitura visual e multimidia</span>
+                <strong>3 passos</strong>
+                <span>escolher, enviar e ler o resumo</span>
               </article>
               <article>
-                <strong>Link</strong>
-                <span>Checagem de noticia</span>
+                <strong>5 areas</strong>
+                <span>cada uma com sua propria aba</span>
               </article>
               <article>
-                <strong>Upload</strong>
-                <span>Imagem, musica e video</span>
+                <strong>Retorno rapido</strong>
+                <span>pra ajudar a olhar com mais calma</span>
               </article>
             </div>
           </div>
@@ -97,81 +96,52 @@
 
       <section class="section-block" id="recursos">
         <div class="section-head">
-          <p class="section-kicker">Recursos</p>
-          <h2>Um tipo de verificacao para cada formato</h2>
+          <p class="section-kicker">O que tem no site</p>
+          <h2>Areas de checagem</h2>
         </div>
 
         <div class="feature-grid">
           <a class="feature-card glossy-panel" href="verificacao.html#imagem">
             <span class="feature-icon">IMG</span>
             <h3>Imagem</h3>
-            <p>Procura sinais visuais de geracao, repeticao, contorno estranho e incoerencia de cena.</p>
+            <p>Pra imagem com cara de montagem ou detalhe esquisito.</p>
           </a>
 
           <a class="feature-card glossy-panel" href="verificacao.html#fonte">
             <span class="feature-icon">SRC</span>
             <h3>Fonte</h3>
-            <p>Le o link, resume a afirmacao central e compara o contexto com referencias externas.</p>
+            <p>Pra noticia, post ou link que voce quer conferir melhor.</p>
           </a>
 
           <a class="feature-card glossy-panel" href="verificacao.html#bot">
             <span class="feature-icon">BOT</span>
             <h3>Bot</h3>
-            <p>Olha handle, estrutura do perfil, aleatoriedade e sinais tipicos de automacao.</p>
+            <p>Pra perfil que parece falso, automatizado ou meio suspeito.</p>
           </a>
 
           <a class="feature-card glossy-panel" href="verificacao.html#audio">
             <span class="feature-icon">AUD</span>
             <h3>Musica</h3>
-            <p>Analisa naturalidade de voz, timbre, looping, artefatos e textura sonora do arquivo.</p>
+            <p>Pra audio com voz estranha, looping ou cara de gerado.</p>
           </a>
 
           <a class="feature-card glossy-panel" href="verificacao.html#video">
             <span class="feature-icon">VID</span>
             <h3>Video</h3>
-            <p>Verifica consistencia entre quadros, luz, labios, fisica de cena e deformacoes.</p>
+            <p>Pra video com movimento, rosto ou sincronizacao esquisita.</p>
           </a>
         </div>
       </section>
 
-      <section class="section-block" id="fluxo">
-        <div class="section-head">
-          <p class="section-kicker">Fluxo</p>
-          <h2>Mesmo esquema simples de antes, mas expandido</h2>
-        </div>
-
-        <div class="steps-grid">
-          <article class="step-card glossy-panel">
-            <span>01</span>
-            <h3>Escolha a aba</h3>
-            <p>Entre em verificacao e selecione imagem, fonte, bot, musica ou video.</p>
-          </article>
-
-          <article class="step-card glossy-panel">
-            <span>02</span>
-            <h3>Envie ou cole</h3>
-            <p>Suba o arquivo certo ou cole o link do perfil ou da noticia que voce quer ler.</p>
-          </article>
-
-          <article class="step-card glossy-panel">
-            <span>03</span>
-            <h3>Leia o retorno</h3>
-            <p>Veja status, confianca e os pontos mais importantes que levaram ao veredito.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section-block" id="porque">
+      <section class="section-block">
         <div class="bottom-banner glossy-panel">
           <div>
-            <p class="section-kicker">Projeto</p>
-            <h2>O mesmo esquema de paginas, agora com cara aero e mais formatos de analise.</h2>
-            <p>
-              A home apresenta os recursos e a pagina de verificacao concentra o painel completo.
-            </p>
+            <p class="section-kicker">Resumo</p>
+            <h2>A ideia agora e simples: entrar, escolher a area e usar o painel.</h2>
+            <p>A base do site ficou focada na ferramenta, sem disputar atencao com explicacao demais.</p>
           </div>
 
-          <a class="primary-button link-button" href="verificacao.html">Ir para verificacao</a>
+          <a class="primary-button link-button" href="verificacao.html">Ir pro painel</a>
         </div>
       </section>
     </main>
