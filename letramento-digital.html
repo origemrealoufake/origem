@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Tema 2 da Origem: letramento digital e educacao midiatica em linguagem simples."
+      content="Tema 2 da Origem: letramento digital e educa&ccedil;&atilde;o midi&aacute;tica."
     />
     <title>Origem | Letramento Digital</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=28" />
+    <link rel="stylesheet" href="styles.css?v=31" />
   </head>
   <body>
     <div class="aero-bg" aria-hidden="true">
@@ -23,9 +23,12 @@
       <div class="bubble bubble-three"></div>
       <div class="glow-band glow-top"></div>
       <div class="glow-band glow-bottom"></div>
+      <div class="sky-ribbon ribbon-one"></div>
+      <div class="sky-ribbon ribbon-two"></div>
+      <div class="sun-halo"></div>
     </div>
 
-    <header class="site-header">
+    <header class="site-header topbar-shell">
       <a class="brand" href="index.html">
         <span class="brand-mark">O</span>
         <span class="brand-copy">
@@ -34,84 +37,107 @@
         </span>
       </a>
 
-      <nav class="site-nav" aria-label="Navegacao principal">
-        <a href="index.html">Inicio</a>
-        <a href="proposta.html">Temas</a>
-        <a href="verificacao.html">Painel</a>
+      <nav class="site-nav top-nav" aria-label="Navegacao principal">
+        <a class="is-active" href="proposta.html" aria-current="page">Proposta</a>
+        <a href="index.html">Home</a>
+        <a href="verificacao.html">Painel Central</a>
       </nav>
 
       <a class="header-cta" href="proposta.html">Ver proposta</a>
     </header>
 
     <main class="page-shell">
-      <section class="hero hero-verify glossy-panel" id="tema">
-        <p class="hero-kicker">Tema 2</p>
-        <h1>Letramento digital e educacao midiatica</h1>
-        <p class="hero-copy">
-          Aqui o foco e ensinar a pessoa a usar a internet com mais cuidado. Nao e so detectar erro, e entender melhor
-          como a desinformacao circula.
-        </p>
-      </section>
+      <div class="split-layout proposal-split">
+        <aside class="section-sidebar proposal-sidebar glossy-panel panel-tilt" aria-label="Temas da proposta">
+          <a class="sidebar-home" href="index.html" aria-label="Ir para a home">&#8962;</a>
 
-      <section class="section-block">
-        <div class="section-head">
-          <p class="section-kicker">O que esse tema pede</p>
-          <h2>Resumo rapido</h2>
-        </div>
-
-        <div class="topic-columns">
-          <article class="info-card glossy-panel">
-            <h3>Ideia central</h3>
-            <p>O objetivo e ajudar a pessoa a pensar antes de clicar, confiar ou repassar.</p>
-          </article>
-
-          <article class="info-card glossy-panel">
-            <h3>Como entra na Origem</h3>
-            <p>O site tenta ensinar no proprio uso, com texto curto, caminho claro e separacao por tipo de checagem.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section-block" id="origem">
-        <div class="section-head">
-          <p class="section-kicker">No site</p>
-          <h2>Onde esse tema aparece</h2>
-        </div>
-
-        <div class="topic-columns">
-          <article class="info-card glossy-panel">
-            <h3>Linguagem simples</h3>
-            <p>Os textos foram puxados pra um jeito mais direto, pra nao parecer manual tecnico.</p>
-          </article>
-
-          <article class="info-card glossy-panel">
-            <h3>Separacao por abas</h3>
-            <p>Cada problema ficou no seu lugar, o que ajuda a pessoa a entender melhor o que esta checando.</p>
-          </article>
-
-          <article class="info-card glossy-panel">
-            <h3>Paginas de tema</h3>
-            <p>As paginas curtas ajudam a explicar o projeto sem jogar tudo em uma tela so.</p>
-          </article>
-
-          <article class="info-card glossy-panel">
-            <h3>Treino no uso real</h3>
-            <p>Em vez de ficar so na teoria, a pessoa pode abrir o painel e testar na pratica.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section-block">
-        <div class="bottom-banner glossy-panel">
-          <div>
-            <p class="section-kicker">Resumo</p>
-            <h2>Esse tema aparece mais no jeito do site funcionar do que em uma aba so.</h2>
-            <p>Ele ta na linguagem, na organizacao e no uso mais guiado.</p>
+          <div class="sidebar-copy">
+            <p class="section-kicker">Proposta</p>
+            <h2>Temas</h2>
+            <span>navegue pelos assuntos sem sair desta &aacute;rea</span>
           </div>
 
-          <a class="primary-button link-button" href="index.html">Voltar pra home</a>
+          <nav class="sidebar-nav">
+            <a class="sidebar-link" href="proposta.html">Vis&atilde;o geral</a>
+            <a class="sidebar-link" href="fatos-fontes.html">Tema 1</a>
+            <a class="sidebar-link is-active" href="letramento-digital.html">Tema 2</a>
+            <a class="sidebar-link" href="manipulacao-audiovisual.html">Tema 3</a>
+            <a class="sidebar-link" href="bots-contas.html">Tema 4</a>
+            <a class="sidebar-link" href="fontes-confiaveis.html">Tema 5</a>
+          </nav>
+        </aside>
+
+        <div class="split-main">
+          <section class="hero hero-verify glossy-panel" id="tema">
+            <p class="hero-kicker">Tema 2</p>
+            <h1>Letramento digital e educa&ccedil;&atilde;o midi&aacute;tica</h1>
+            <p class="hero-copy">
+              Aqui o foco &eacute; ensinar a usar a internet com mais cuidado. N&atilde;o &eacute; s&oacute;
+              detectar erro, mas aprender a reconhecer pressa falsa, links suspeitos e armadilhas do dia a dia.
+            </p>
+          </section>
+
+          <section class="section-block">
+            <div class="section-head">
+              <p class="section-kicker">O que este tema ensina</p>
+              <h2>Resumo r&aacute;pido</h2>
+            </div>
+
+            <div class="topic-columns">
+              <article class="info-card glossy-panel">
+                <h3>Ideia central</h3>
+                <p>O objetivo &eacute; ajudar a pessoa a pensar antes de clicar, confiar, pagar ou repassar algo.</p>
+              </article>
+
+              <article class="info-card glossy-panel">
+                <h3>Como entra na Origem</h3>
+                <p>O site tenta ensinar no pr&oacute;prio uso, com passos simples, texto curto e separa&ccedil;&atilde;o por tipo de d&uacute;vida.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="section-block" id="origem">
+            <div class="section-head">
+              <p class="section-kicker">No site</p>
+              <h2>Como isso aparece na pr&aacute;tica</h2>
+            </div>
+
+            <div class="topic-columns">
+              <article class="info-card glossy-panel">
+                <h3>Mensagem de urg&ecirc;ncia</h3>
+                <p>O tema ensina a desconfiar de textos que tentam apressar a pessoa com medo, pr&ecirc;mio ou amea&ccedil;a.</p>
+              </article>
+
+              <article class="info-card glossy-panel">
+                <h3>Link desconhecido</h3>
+                <p>Tamb&eacute;m ajuda a parar antes de abrir um link estranho, principalmente quando ele chega de surpresa.</p>
+              </article>
+
+              <article class="info-card glossy-panel">
+                <h3>Bot&otilde;es claros</h3>
+                <p>O site mostra cada tipo de checagem no seu lugar, para facilitar a orienta&ccedil;&atilde;o de quem n&atilde;o quer se perder.</p>
+              </article>
+
+              <article class="info-card glossy-panel">
+                <h3>Treino no uso real</h3>
+                <p>Em vez de ficar s&oacute; na teoria, a pessoa pode abrir o painel e testar na pr&aacute;tica o que recebeu no celular.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="section-block">
+            <div class="bottom-banner glossy-panel">
+              <div>
+                <p class="section-kicker">Resumo</p>
+                <h2>Este tema ajuda a usar a internet sem pressa e com mais crit&eacute;rio.</h2>
+                <p>Ele aparece na linguagem, na organiza&ccedil;&atilde;o e no jeito mais guiado de usar o site.</p>
+              </div>
+
+              <a class="primary-button link-button" href="index.html">Voltar para a home</a>
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
     </main>
   </body>
 </html>

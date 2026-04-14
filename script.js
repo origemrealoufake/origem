@@ -11,8 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initSourceAnalyzer();
   initBotAnalyzer();
   initUploadAnalyzer("image", "image/", "imagem");
-  initUploadAnalyzer("audio", "audio/", "musica");
-  initUploadAnalyzer("video", "video/", "video");
+  initUploadAnalyzer("audio", "audio/", "\u00e1udio");
+  initUploadAnalyzer("video", "video/", "v\u00eddeo");
   activateTabFromHashOrDefault();
 });
 
@@ -61,13 +61,14 @@ function activateTab(target, updateHash = true) {
 }
 
 function activateTabFromHashOrDefault() {
+  const buttons = Array.from(document.querySelectorAll("[data-tab-button]"));
   const panels = Array.from(document.querySelectorAll("[data-tab-panel]"));
 
-  if (!panels.length) {
+  if (!buttons.length || !panels.length) {
     return;
   }
 
-  const target = readHashTarget() || panels[0].dataset.tabPanel;
+  const target = readHashTarget() || buttons[0].dataset.tabButton || panels[0].dataset.tabPanel;
   activateTab(target, Boolean(readHashTarget()));
 }
 
@@ -106,7 +107,7 @@ function initSourceAnalyzer() {
 
     button.disabled = true;
     button.textContent = "Verificando...";
-    setFeedback(message, "Lendo a pagina e cruzando referencias com o Gemini...", "success");
+    setFeedback(message, "Lendo a p\u00e1gina e cruzando refer\u00eancias com o Gemini...", "success");
 
     try {
       const data = await requestJson(config.sourceEndpoint, {
@@ -118,10 +119,14 @@ function initSourceAnalyzer() {
       });
 
       setResult(result, data);
-      setFeedback(message, "Verificacao da fonte concluida.", "success");
+      setFeedback(message, "Verifica\u00e7\u00e3o da fonte conclu\u00edda.", "success");
     } catch (error) {
       if (error?.status === 404) {
-        setFeedback(message, "A rota Gemini de fonte ainda nao foi publicada no worker. Publique o backend para usar esta aba.", "error");
+        setFeedback(
+          message,
+          "A rota Gemini de fonte ainda n\u00e3o foi publicada no worker. Publique o backend para usar esta aba.",
+          "error"
+        );
         return;
       }
 
@@ -147,7 +152,7 @@ function initBotAnalyzer() {
     const value = input.value.trim();
 
     if (!value) {
-      setFeedback(message, "Cole um link, handle ou nome para verificar.", "error");
+      setFeedback(message, "Cole um link, @ ou nome para verificar.", "error");
       return;
     }
 
@@ -169,10 +174,14 @@ function initBotAnalyzer() {
       });
 
       setResult(result, data);
-      setFeedback(message, "Analise do bot concluida.", "success");
+      setFeedback(message, "An\u00e1lise do bot conclu\u00edda.", "success");
     } catch (error) {
       if (error?.status === 404) {
-        setFeedback(message, "A rota Gemini de bot ainda nao foi publicada no worker. Publique o backend para usar esta aba.", "error");
+        setFeedback(
+          message,
+          "A rota Gemini de bot ainda n\u00e3o foi publicada no worker. Publique o backend para usar esta aba.",
+          "error"
+        );
         return;
       }
 
@@ -227,12 +236,12 @@ function initUploadAnalyzer(type, mimePrefix, typeLabel) {
     const file = mediaState[type].file;
 
     if (!file) {
-      setFeedback(message, `Envie um arquivo de ${typeLabel} para iniciar a analise.`, "error");
+      setFeedback(message, `Envie um arquivo de ${typeLabel} para iniciar a an\u00e1lise.`, "error");
       return;
     }
 
     if (!String(file.type || "").startsWith(mimePrefix)) {
-      setFeedback(message, `O arquivo enviado nao parece ser de ${typeLabel}.`, "error");
+      setFeedback(message, `O arquivo enviado n\u00e3o parece ser de ${typeLabel}.`, "error");
       return;
     }
 
@@ -247,16 +256,21 @@ function initUploadAnalyzer(type, mimePrefix, typeLabel) {
     try {
       const formData = new FormData();
       formData.append(type, file);
+
       const data = await requestJson(config[`${type}Endpoint`], {
         method: "POST",
         body: formData
       });
 
       setResult(result, data);
-      setFeedback(message, `Analise de ${typeLabel} concluida.`, "success");
+      setFeedback(message, `An\u00e1lise de ${typeLabel} conclu\u00edda.`, "success");
     } catch (error) {
       if (error?.status === 404) {
-        setFeedback(message, `A rota Gemini de ${typeLabel} ainda nao foi publicada no worker. Publique o backend para usar esta aba.`, "error");
+        setFeedback(
+          message,
+          `A rota Gemini de ${typeLabel} ainda n\u00e3o foi publicada no worker. Publique o backend para usar esta aba.`,
+          "error"
+        );
         return;
       }
 
@@ -309,10 +323,10 @@ function setResult(elements, data) {
     return;
   }
 
-  elements.badge.textContent = data.status || "Concluido";
+  elements.badge.textContent = data.status || "Conclu\u00eddo";
   elements.badge.className = `result-badge ${data.badgeClass || "is-demo"}`;
-  elements.label.textContent = data.label || "Analise concluida.";
-  elements.confidence.textContent = `Confianca: ${Number.isFinite(Number(data.confidence)) ? Number(data.confidence) : 0} de 100.`;
+  elements.label.textContent = data.label || "An\u00e1lise conclu\u00edda.";
+  elements.confidence.textContent = `Confian\u00e7a: ${Number.isFinite(Number(data.confidence)) ? Number(data.confidence) : 0} de 100.`;
   elements.text.textContent = data.text || "Sem resumo adicional.";
   renderPoints(elements.points, data.points);
 }
@@ -323,10 +337,11 @@ async function requestJson(url, options) {
   try {
     response = await fetch(url, options);
   } catch (error) {
-    const isLocalApi = String(url || "").includes("127.0.0.1:8787") || String(url || "").includes("localhost:8787");
+    const isLocalApi =
+      String(url || "").includes("127.0.0.1:8787") || String(url || "").includes("localhost:8787");
     const message = isLocalApi
-      ? "Nao foi possivel conectar ao worker local do Gemini em 127.0.0.1:8787."
-      : "Nao foi possivel conectar a API Gemini publicada.";
+      ? "N\u00e3o foi poss\u00edvel conectar ao worker local do Gemini em 127.0.0.1:8787."
+      : "N\u00e3o foi poss\u00edvel conectar \u00e0 API Gemini publicada.";
     const networkError = new Error(message);
     networkError.cause = error;
     throw networkError;
@@ -335,7 +350,7 @@ async function requestJson(url, options) {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    const error = new Error(data.error || "A requisicao falhou.");
+    const error = new Error(data.error || "A requisi\u00e7\u00e3o falhou.");
     error.status = response.status;
     error.data = data;
     throw error;
@@ -351,7 +366,7 @@ function ensureConfigured(endpoint, messageNode, typeLabel) {
 
   setFeedback(
     messageNode,
-    `Backend da analise de ${typeLabel} nao configurado. Ajuste o arquivo config.js com a URL da API.`,
+    `Backend da an\u00e1lise de ${typeLabel} n\u00e3o configurado. Ajuste o arquivo config.js com a URL da API.`,
     "error"
   );
 
@@ -376,7 +391,7 @@ function renderPreview(type, file, previewNode, url, typeLabel) {
   let mediaMarkup = "";
 
   if (type === "image") {
-    mediaMarkup = `<img src="${url}" alt="Arquivo enviado para analise" />`;
+    mediaMarkup = `<img src="${url}" alt="Arquivo enviado para an\u00e1lise" />`;
   } else if (type === "audio") {
     mediaMarkup = `<audio controls src="${url}"></audio>`;
   } else if (type === "video") {
@@ -389,7 +404,7 @@ function renderPreview(type, file, previewNode, url, typeLabel) {
     </div>
     <div class="preview-meta">
       <strong>${file.name}</strong>
-      <p>${file.type || "Formato nao identificado"} - ${formatSize(file.size)} - ${capitalize(typeLabel)}</p>
+      <p>${file.type || "Formato n\u00e3o identificado"} - ${formatSize(file.size)} - ${capitalize(typeLabel)}</p>
     </div>
   `;
 }
@@ -401,7 +416,7 @@ function resetPreview(type, previewNode, typeLabel) {
     <div class="empty-state">
       <div>
         <strong>Nenhum arquivo enviado</strong>
-        <p>A visualizacao do ${typeLabel} aparece aqui.</p>
+        <p>A visualiza\u00e7\u00e3o do ${typeLabel} aparece aqui.</p>
       </div>
     </div>
   `;

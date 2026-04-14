@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Painel da Origem para checar imagem, fonte, bot, musica e video de forma direta."
+      content="Painel da Origem para checar imagem, fonte, bot, &aacute;udio e v&iacute;deo de forma direta e orientada."
     />
-    <title>Origem | Verificacao</title>
+    <title>Origem | Verifica&ccedil;&atilde;o</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=28" />
+    <link rel="stylesheet" href="styles.css?v=31" />
     <script src="config.js?v=24"></script>
-    <script src="script.js?v=24" defer></script>
+    <script src="script.js?v=25" defer></script>
   </head>
   <body>
     <div class="aero-bg" aria-hidden="true">
@@ -25,9 +25,12 @@
       <div class="bubble bubble-three"></div>
       <div class="glow-band glow-top"></div>
       <div class="glow-band glow-bottom"></div>
+      <div class="sky-ribbon ribbon-one"></div>
+      <div class="sky-ribbon ribbon-two"></div>
+      <div class="sun-halo"></div>
     </div>
 
-    <header class="site-header">
+    <header class="site-header topbar-shell">
       <a class="brand" href="index.html">
         <span class="brand-mark">O</span>
         <span class="brand-copy">
@@ -36,35 +39,68 @@
         </span>
       </a>
 
-      <nav class="site-nav" aria-label="Navegacao principal">
-        <a href="index.html">Inicio</a>
+      <nav class="site-nav top-nav" aria-label="Navegacao principal">
         <a href="proposta.html">Proposta</a>
-        <a href="#imagem">Painel</a>
+        <a href="index.html">Home</a>
+        <a class="is-active" href="verificacao.html" aria-current="page">Painel Central</a>
       </nav>
 
-      <a class="header-cta" href="index.html">Voltar para home</a>
+      <a class="header-cta" href="index.html">Voltar para a home</a>
     </header>
 
     <main class="page-shell">
-      <section class="hero hero-verify glossy-panel">
+      <section class="hero hero-verify glossy-panel panel-tilt">
         <p class="hero-kicker">Painel central</p>
-        <h1>Escolhe a aba, manda o conteudo e le o resumo.</h1>
-        <p class="hero-copy">Imagem, fonte, bot, musica e video no mesmo lugar.</p>
+        <h1>Escolha a &aacute;rea na lateral, envie o conte&uacute;do e acompanhe um resumo claro da an&aacute;lise.</h1>
+        <p class="hero-copy">O painel foi pensado para orientar com calma, com uma checagem mais guiada e f&aacute;cil de entender.</p>
       </section>
 
-      <section class="tool-shell glossy-panel" aria-labelledby="analise-title">
-        <div class="tool-head">
-          <div>
-            <p class="section-kicker">Verificacao</p>
-            <h2 id="analise-title">Painel multimidia</h2>
+      <div class="panel-split">
+        <aside class="section-sidebar panel-sidebar glossy-panel panel-tilt" aria-label="Areas do painel">
+          <div class="sidebar-copy">
+            <p class="section-kicker">Painel</p>
+            <h2>&Aacute;reas</h2>
+            <span>troque de an&aacute;lise por aqui sem se perder</span>
           </div>
 
-          <div class="tool-tabs" role="tablist" aria-label="Tipos de analise">
-            <button class="tool-tab" type="button" data-tab-button="imagem" aria-selected="false">Imagem</button>
-            <button class="tool-tab" type="button" data-tab-button="fonte" aria-selected="false">Fonte</button>
-            <button class="tool-tab" type="button" data-tab-button="bot" aria-selected="false">Bot</button>
-            <button class="tool-tab" type="button" data-tab-button="audio" aria-selected="false">Musica</button>
-            <button class="tool-tab" type="button" data-tab-button="video" aria-selected="false">Video</button>
+          <div class="panel-tab-list" role="tablist" aria-label="Tipos de an&aacute;lise">
+            <button class="tool-tab panel-tab" type="button" data-tab-button="bot" aria-selected="false">Bot</button>
+            <button class="tool-tab panel-tab" type="button" data-tab-button="imagem" aria-selected="false">Imagem</button>
+            <button class="tool-tab panel-tab" type="button" data-tab-button="video" aria-selected="false">V&iacute;deo</button>
+            <button class="tool-tab panel-tab" type="button" data-tab-button="audio" aria-selected="false">&Aacute;udio</button>
+            <button class="tool-tab panel-tab" type="button" data-tab-button="fonte" aria-selected="false">Fonte</button>
+          </div>
+        </aside>
+
+        <section class="tool-shell panel-main glossy-panel panel-tilt" aria-labelledby="analise-title">
+        <div class="window-bar">
+          <div class="window-dots" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <p id="analise-title">Central de verifica&ccedil;&atilde;o da Origem</p>
+        </div>
+
+        <div class="tool-overview">
+          <article class="overview-card">
+            <strong>Checagem guiada</strong>
+            <span>cada tipo de d&uacute;vida fica no lugar certo</span>
+          </article>
+          <article class="overview-card">
+            <strong>Leitura simples</strong>
+            <span>resumos diretos para entender mais r&aacute;pido</span>
+          </article>
+          <article class="overview-card">
+            <strong>Uso com calma</strong>
+            <span>feito para orientar antes de compartilhar</span>
+          </article>
+        </div>
+
+        <div class="tool-head">
+          <div>
+            <p class="section-kicker">Verifica&ccedil;&atilde;o</p>
+            <h2>Janela de an&aacute;lise</h2>
           </div>
         </div>
 
@@ -75,14 +111,14 @@
               <label class="upload-box" id="image-upload" for="image-input">
                 <input id="image-input" type="file" accept="image/*" />
                 <span class="upload-title">Clique para carregar uma imagem</span>
-                <span class="upload-subtitle">A leitura visual vai observar textura, contornos e sinais de geracao.</span>
+                <span class="upload-subtitle">A leitura visual observa textura, contornos e sinais de gera&ccedil;&atilde;o.</span>
               </label>
 
               <div class="preview-box" id="image-preview" aria-live="polite">
                 <div class="empty-state">
                   <div>
                     <strong>Nenhuma imagem enviada</strong>
-                    <p>A visualizacao do arquivo aparece aqui.</p>
+                    <p>A visualiza&ccedil;&atilde;o do arquivo aparece aqui.</p>
                   </div>
                 </div>
               </div>
@@ -99,10 +135,10 @@
                   <span class="result-badge is-neutral" id="image-badge">Aguardando</span>
                 </div>
                 <p class="result-label" id="image-label">Nenhum arquivo recebido ainda.</p>
-                <p class="result-confidence" id="image-confidence">Confianca: aguardando analise.</p>
-                <p class="result-text" id="image-text">Envie uma imagem para ver o retorno desta analise.</p>
+                <p class="result-confidence" id="image-confidence">Confian&ccedil;a: aguardando an&aacute;lise.</p>
+                <p class="result-text" id="image-text">Envie uma imagem para ver o retorno desta an&aacute;lise.</p>
                 <ul class="result-points" id="image-points">
-                  <li>A analise visual vai apontar os detalhes principais aqui.</li>
+                  <li>A an&aacute;lise visual vai apontar os detalhes principais aqui.</li>
                 </ul>
               </div>
             </aside>
@@ -112,7 +148,7 @@
         <div class="tool-panel" id="fonte" data-tab-panel="fonte" role="tabpanel">
           <div class="input-layout">
             <section class="input-area">
-              <label class="field-label" for="source-input">Cole o link da noticia ou publicacao</label>
+              <label class="field-label" for="source-input">Cole o link da not&iacute;cia ou publica&ccedil;&atilde;o</label>
               <input
                 class="text-input"
                 id="source-input"
@@ -122,7 +158,7 @@
               />
 
               <button class="primary-button" id="analyze-source-button" type="button">Verificar fonte</button>
-              <p class="helper-note" id="source-helper-note">Esse fluxo le o link e cruza o contexto com referencias externas.</p>
+              <p class="helper-note" id="source-helper-note">Esse fluxo l&ecirc; o link e cruza o contexto com refer&ecirc;ncias externas.</p>
               <p class="feedback-message" id="source-message" aria-live="polite"></p>
             </section>
 
@@ -133,10 +169,10 @@
                   <span class="result-badge is-neutral" id="source-badge">Aguardando</span>
                 </div>
                 <p class="result-label" id="source-label">Nenhum link enviado ainda.</p>
-                <p class="result-confidence" id="source-confidence">Confianca: aguardando analise.</p>
-                <p class="result-text" id="source-text">Cole um link para ver o retorno desta analise.</p>
+                <p class="result-confidence" id="source-confidence">Confian&ccedil;a: aguardando an&aacute;lise.</p>
+                <p class="result-text" id="source-text">Cole um link para ver o retorno desta an&aacute;lise.</p>
                 <ul class="result-points" id="source-points">
-                  <li>A verificacao da noticia vai resumir os pontos principais aqui.</li>
+                  <li>A verifica&ccedil;&atilde;o da not&iacute;cia vai resumir os pontos principais aqui.</li>
                 </ul>
               </div>
             </aside>
@@ -146,7 +182,7 @@
         <div class="tool-panel" id="bot" data-tab-panel="bot" role="tabpanel">
           <div class="input-layout">
             <section class="input-area">
-              <label class="field-label" for="bot-input">Cole o link ou handle do perfil</label>
+              <label class="field-label" for="bot-input">Cole o link ou o @ do perfil</label>
               <input
                 class="text-input"
                 id="bot-input"
@@ -156,7 +192,7 @@
               />
 
               <button class="primary-button" id="analyze-bot-button" type="button">Analisar bot</button>
-              <p class="helper-note" id="bot-helper-note">Esse fluxo observa estrutura do perfil, handle e sinais de automacao.</p>
+              <p class="helper-note" id="bot-helper-note">Esse fluxo observa a estrutura do perfil, o identificador e os sinais de automa&ccedil;&atilde;o.</p>
               <p class="feedback-message" id="bot-message" aria-live="polite"></p>
             </section>
 
@@ -167,10 +203,10 @@
                   <span class="result-badge is-neutral" id="bot-badge">Aguardando</span>
                 </div>
                 <p class="result-label" id="bot-label">Nenhum perfil enviado ainda.</p>
-                <p class="result-confidence" id="bot-confidence">Confianca: aguardando analise.</p>
-                <p class="result-text" id="bot-text">Cole um identificador para ver o retorno desta analise.</p>
+                <p class="result-confidence" id="bot-confidence">Confian&ccedil;a: aguardando an&aacute;lise.</p>
+                <p class="result-text" id="bot-text">Cole um identificador para ver o retorno desta an&aacute;lise.</p>
                 <ul class="result-points" id="bot-points">
-                  <li>Os principais sinais estruturais vao aparecer aqui.</li>
+                  <li>Os principais sinais estruturais v&atilde;o aparecer aqui.</li>
                 </ul>
               </div>
             </aside>
@@ -180,38 +216,38 @@
         <div class="tool-panel" id="audio" data-tab-panel="audio" role="tabpanel">
           <div class="input-layout">
             <section class="input-area">
-              <label class="field-label" for="audio-input">Enviar musica</label>
+              <label class="field-label" for="audio-input">Enviar &aacute;udio</label>
               <label class="upload-box" id="audio-upload" for="audio-input">
                 <input id="audio-input" type="file" accept="audio/*" />
-                <span class="upload-title">Clique para carregar um audio</span>
-                <span class="upload-subtitle">A leitura sonora vai verificar voz, timbre, looping e artefatos.</span>
+                <span class="upload-title">Clique para carregar um &aacute;udio</span>
+                <span class="upload-subtitle">A leitura sonora verifica voz, timbre, looping e artefatos.</span>
               </label>
 
               <div class="preview-box" id="audio-preview" aria-live="polite">
                 <div class="empty-state">
                   <div>
-                    <strong>Nenhum audio enviado</strong>
-                    <p>A visualizacao do arquivo aparece aqui.</p>
+                    <strong>Nenhum &aacute;udio enviado</strong>
+                    <p>A visualiza&ccedil;&atilde;o do arquivo aparece aqui.</p>
                   </div>
                 </div>
               </div>
 
-              <button class="primary-button" id="analyze-audio-button" type="button">Analisar musica</button>
-              <p class="helper-note" id="audio-helper-note">Esse fluxo analisa autenticidade sonora do arquivo enviado.</p>
+              <button class="primary-button" id="analyze-audio-button" type="button">Analisar &aacute;udio</button>
+              <p class="helper-note" id="audio-helper-note">Esse fluxo analisa a autenticidade sonora do arquivo enviado.</p>
               <p class="feedback-message" id="audio-message" aria-live="polite"></p>
             </section>
 
             <aside class="result-area">
               <div class="result-card">
                 <div class="result-topline">
-                  <h3>Resultado da musica</h3>
+                  <h3>Resultado do &aacute;udio</h3>
                   <span class="result-badge is-neutral" id="audio-badge">Aguardando</span>
                 </div>
                 <p class="result-label" id="audio-label">Nenhum arquivo recebido ainda.</p>
-                <p class="result-confidence" id="audio-confidence">Confianca: aguardando analise.</p>
-                <p class="result-text" id="audio-text">Envie uma musica para ver o retorno desta analise.</p>
+                <p class="result-confidence" id="audio-confidence">Confian&ccedil;a: aguardando an&aacute;lise.</p>
+                <p class="result-text" id="audio-text">Envie um &aacute;udio para ver o retorno desta an&aacute;lise.</p>
                 <ul class="result-points" id="audio-points">
-                  <li>Os sinais de autenticidade sonora vao aparecer aqui.</li>
+                  <li>Os sinais de autenticidade sonora v&atilde;o aparecer aqui.</li>
                 </ul>
               </div>
             </aside>
@@ -221,45 +257,45 @@
         <div class="tool-panel" id="video" data-tab-panel="video" role="tabpanel">
           <div class="input-layout">
             <section class="input-area">
-              <label class="field-label" for="video-input">Enviar video</label>
+              <label class="field-label" for="video-input">Enviar v&iacute;deo</label>
               <label class="upload-box" id="video-upload" for="video-input">
                 <input id="video-input" type="file" accept="video/*" />
-                <span class="upload-title">Clique para carregar um video</span>
-                <span class="upload-subtitle">A leitura temporal vai observar quadros, luz, labios e consistencia.</span>
+                <span class="upload-title">Clique para carregar um v&iacute;deo</span>
+                <span class="upload-subtitle">A leitura temporal observa quadros, luz, l&aacute;bios e consist&ecirc;ncia.</span>
               </label>
 
               <div class="preview-box" id="video-preview" aria-live="polite">
                 <div class="empty-state">
                   <div>
-                    <strong>Nenhum video enviado</strong>
-                    <p>A visualizacao do arquivo aparece aqui.</p>
+                    <strong>Nenhum v&iacute;deo enviado</strong>
+                    <p>A visualiza&ccedil;&atilde;o do arquivo aparece aqui.</p>
                   </div>
                 </div>
               </div>
 
-              <button class="primary-button" id="analyze-video-button" type="button">Analisar video</button>
-              <p class="helper-note" id="video-helper-note">Esse fluxo analisa autenticidade visual e temporal do video enviado.</p>
+              <button class="primary-button" id="analyze-video-button" type="button">Analisar v&iacute;deo</button>
+              <p class="helper-note" id="video-helper-note">Esse fluxo analisa a autenticidade visual e temporal do v&iacute;deo enviado.</p>
               <p class="feedback-message" id="video-message" aria-live="polite"></p>
             </section>
 
             <aside class="result-area">
               <div class="result-card">
                 <div class="result-topline">
-                  <h3>Resultado do video</h3>
+                  <h3>Resultado do v&iacute;deo</h3>
                   <span class="result-badge is-neutral" id="video-badge">Aguardando</span>
                 </div>
                 <p class="result-label" id="video-label">Nenhum arquivo recebido ainda.</p>
-                <p class="result-confidence" id="video-confidence">Confianca: aguardando analise.</p>
-                <p class="result-text" id="video-text">Envie um video para ver o retorno desta analise.</p>
+                <p class="result-confidence" id="video-confidence">Confian&ccedil;a: aguardando an&aacute;lise.</p>
+                <p class="result-text" id="video-text">Envie um v&iacute;deo para ver o retorno desta an&aacute;lise.</p>
                 <ul class="result-points" id="video-points">
-                  <li>Os sinais de consistencia temporal vao aparecer aqui.</li>
+                  <li>Os sinais de consist&ecirc;ncia temporal v&atilde;o aparecer aqui.</li>
                 </ul>
               </div>
             </aside>
           </div>
         </div>
-      </section>
-
+        </section>
+      </div>
     </main>
   </body>
 </html>

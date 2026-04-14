@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Tema 3 da Origem: deteccao de manipulacao audiovisual em imagem, audio e video."
+      content="Tema 3 da Origem: detec&ccedil;&atilde;o de manipula&ccedil;&atilde;o audiovisual."
     />
-    <title>Origem | Manipulacao Audiovisual</title>
+    <title>Origem | Manipula&ccedil;&atilde;o Audiovisual</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Exo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=28" />
+    <link rel="stylesheet" href="styles.css?v=31" />
   </head>
   <body>
     <div class="aero-bg" aria-hidden="true">
@@ -23,9 +23,12 @@
       <div class="bubble bubble-three"></div>
       <div class="glow-band glow-top"></div>
       <div class="glow-band glow-bottom"></div>
+      <div class="sky-ribbon ribbon-one"></div>
+      <div class="sky-ribbon ribbon-two"></div>
+      <div class="sun-halo"></div>
     </div>
 
-    <header class="site-header">
+    <header class="site-header topbar-shell">
       <a class="brand" href="index.html">
         <span class="brand-mark">O</span>
         <span class="brand-copy">
@@ -34,82 +37,105 @@
         </span>
       </a>
 
-      <nav class="site-nav" aria-label="Navegacao principal">
-        <a href="index.html">Inicio</a>
-        <a href="proposta.html">Temas</a>
-        <a href="verificacao.html">Verificacao</a>
+      <nav class="site-nav top-nav" aria-label="Navegacao principal">
+        <a class="is-active" href="proposta.html" aria-current="page">Proposta</a>
+        <a href="index.html">Home</a>
+        <a href="verificacao.html">Painel Central</a>
       </nav>
 
-      <a class="header-cta" href="verificacao.html#imagem">Abrir midia</a>
+      <a class="header-cta" href="verificacao.html#imagem">Abrir m&iacute;dia</a>
     </header>
 
     <main class="page-shell">
-      <section class="hero hero-verify glossy-panel" id="tema">
-        <p class="hero-kicker">Tema 3</p>
-        <h1>Deteccao de manipulacao audiovisual</h1>
-        <p class="hero-copy">
-          Esse tema trata de imagem, audio e video com sinal de montagem. A ideia e ajudar a pessoa a notar quando uma
-          midia parece manipulada.
-        </p>
-      </section>
+      <div class="split-layout proposal-split">
+        <aside class="section-sidebar proposal-sidebar glossy-panel panel-tilt" aria-label="Temas da proposta">
+          <a class="sidebar-home" href="index.html" aria-label="Ir para a home">&#8962;</a>
 
-      <section class="section-block">
-        <div class="section-head">
-          <p class="section-kicker">O que esse tema pede</p>
-          <h2>Resumo rapido</h2>
-        </div>
-
-        <div class="topic-columns">
-          <article class="info-card glossy-panel">
-            <h3>O que entra aqui</h3>
-            <p>Deepfake, imagem alterada, audio falso e video com movimento ou sincronizacao estranha.</p>
-          </article>
-
-          <article class="info-card glossy-panel">
-            <h3>O que a Origem faz</h3>
-            <p>Separou esse tema em tres entradas praticas: imagem, musica e video.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section-block" id="painel">
-        <div class="section-head">
-          <p class="section-kicker">No painel</p>
-          <h2>Como isso foi organizado no site</h2>
-        </div>
-
-        <div class="theme-grid">
-          <a class="theme-link-card glossy-panel" href="verificacao.html#imagem">
-            <span class="topic-number">Imagem</span>
-            <h3>Leitura visual</h3>
-            <p>Olha detalhe visual, repeticao e coisa fora do lugar.</p>
-          </a>
-
-          <a class="theme-link-card glossy-panel" href="verificacao.html#audio">
-            <span class="topic-number">Musica</span>
-            <h3>Leitura sonora</h3>
-            <p>Olha voz, timbre, looping e ruido que chama atencao.</p>
-          </a>
-
-          <a class="theme-link-card glossy-panel" href="verificacao.html#video">
-            <span class="topic-number">Video</span>
-            <h3>Leitura temporal</h3>
-            <p>Olha quadro, labios, luz e consistencia da cena.</p>
-          </a>
-        </div>
-      </section>
-
-      <section class="section-block">
-        <div class="bottom-banner glossy-panel">
-          <div>
-            <p class="section-kicker">Pratica</p>
-            <h2>Esse tema ficou simples de entender porque ja foi separado por tipo de midia.</h2>
-            <p>Em vez de juntar tudo, o painel abre um caminho pra cada caso.</p>
+          <div class="sidebar-copy">
+            <p class="section-kicker">Proposta</p>
+            <h2>Temas</h2>
+            <span>navegue pelos assuntos sem sair desta &aacute;rea</span>
           </div>
 
-          <a class="primary-button link-button" href="verificacao.html">Abrir painel de midia</a>
+          <nav class="sidebar-nav">
+            <a class="sidebar-link" href="proposta.html">Vis&atilde;o geral</a>
+            <a class="sidebar-link" href="fatos-fontes.html">Tema 1</a>
+            <a class="sidebar-link" href="letramento-digital.html">Tema 2</a>
+            <a class="sidebar-link is-active" href="manipulacao-audiovisual.html">Tema 3</a>
+            <a class="sidebar-link" href="bots-contas.html">Tema 4</a>
+            <a class="sidebar-link" href="fontes-confiaveis.html">Tema 5</a>
+          </nav>
+        </aside>
+
+        <div class="split-main">
+          <section class="hero hero-verify glossy-panel" id="tema">
+            <p class="hero-kicker">Tema 3</p>
+            <h1>Detec&ccedil;&atilde;o de manipula&ccedil;&atilde;o audiovisual</h1>
+            <p class="hero-copy">
+              Este tema trata de imagem, &aacute;udio e v&iacute;deo com sinal de montagem. A ideia &eacute; ajudar a
+              notar quando uma m&iacute;dia parece manipulada ou foi feita para enganar.
+            </p>
+          </section>
+
+          <section class="section-block">
+            <div class="section-head">
+              <p class="section-kicker">O que este tema ensina</p>
+              <h2>Resumo r&aacute;pido</h2>
+            </div>
+
+            <div class="topic-columns">
+              <article class="info-card glossy-panel">
+                <h3>O que mais engana</h3>
+                <p>Foto alterada, &aacute;udio falso, voz conhecida pedindo dinheiro e v&iacute;deo com fala estranha entram aqui.</p>
+              </article>
+
+              <article class="info-card glossy-panel">
+                <h3>O que a Origem faz</h3>
+                <p>Esse tema foi separado em imagem, &aacute;udio e v&iacute;deo para a orienta&ccedil;&atilde;o ficar mais simples.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="section-block" id="painel">
+            <div class="section-head">
+              <p class="section-kicker">No painel</p>
+              <h2>Como isso foi organizado no site</h2>
+            </div>
+
+            <div class="theme-grid">
+              <a class="theme-link-card glossy-panel" href="verificacao.html#imagem">
+                <span class="topic-number">Imagem</span>
+                <h3>Leitura visual</h3>
+                <p>Ajuda a perceber montagem, repeti&ccedil;&atilde;o e detalhes estranhos em fotos que circulam em grupos.</p>
+              </a>
+
+              <a class="theme-link-card glossy-panel" href="verificacao.html#audio">
+                <span class="topic-number">&Aacute;udio</span>
+                <h3>Leitura sonora</h3>
+                <p>Ajuda a desconfiar de &aacute;udios com voz estranha, cortes artificiais ou pedidos suspeitos.</p>
+              </a>
+
+              <a class="theme-link-card glossy-panel" href="verificacao.html#video">
+                <span class="topic-number">V&iacute;deo</span>
+                <h3>Leitura temporal</h3>
+                <p>Ajuda a notar fala desalinhada, luz incoerente e movimento estranho em v&iacute;deos.</p>
+              </a>
+            </div>
+          </section>
+
+          <section class="section-block">
+            <div class="bottom-banner glossy-panel">
+              <div>
+                <p class="section-kicker">Pratica</p>
+                <h2>Este tema ajuda a n&atilde;o cair em m&iacute;dias que tentam assustar ou enganar.</h2>
+                <p>Em vez de juntar tudo, o painel abre um caminho espec&iacute;fico para cada tipo de arquivo.</p>
+              </div>
+
+              <a class="primary-button link-button" href="verificacao.html">Abrir painel de m&iacute;dia</a>
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
     </main>
   </body>
 </html>

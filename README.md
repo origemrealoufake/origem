@@ -46,8 +46,17 @@ O `config.js` ja aponta para essa URL em producao.
 2. Defina `GEMINI_API_KEYS` com uma ou mais chaves
    - Exemplo: `GEMINI_API_KEYS=key1,key2,key3`
    - O worker tenta a proxima chave automaticamente quando a atual bate cota ou falha por permissao
+   - Quando o modelo principal entra em alta demanda, o worker tenta automaticamente um fallback menos concorrido
    - `GEMINI_API_KEY` unica continua funcionando como fallback legado
-3. Opcionalmente ajuste:
+3. Opcionalmente ajuste os modelos:
+   - `GEMINI_MODELS`
+   - `GEMINI_IMAGE_MODELS`
+   - `GEMINI_AUDIO_MODELS`
+   - `GEMINI_VIDEO_MODELS`
+   - `GEMINI_BOT_MODELS`
+   - `GEMINI_SOURCE_MODELS`
+   - As variaveis `..._MODEL` antigas continuam funcionando como modelo preferido
+4. Opcionalmente ajuste:
    - `GEMINI_IMAGE_MODEL`
    - `GEMINI_AUDIO_MODEL`
    - `GEMINI_VIDEO_MODEL`
@@ -58,13 +67,14 @@ O `config.js` ja aponta para essa URL em producao.
    - `VIDEO_DAILY_LIMIT`
    - `BOT_DAILY_LIMIT`
    - `SOURCE_DAILY_LIMIT`
-4. Rode o Worker com Wrangler
+5. Rode o Worker com Wrangler
 
 ## Observacoes
 
 - As chaves da API nao devem ir para o GitHub Pages
 - O limite diario do Gemini continua valendo mesmo com o site publico
 - O limitador por IP esta no backend
+- A rotacao automatica agora cobre chave e modelo
 
 ## HackaNav
 

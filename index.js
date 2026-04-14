@@ -6,6 +6,17 @@ const CORS_HEADERS = {
 
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const DEFAULT_MODEL = "gemini-2.5-flash";
+const DEFAULT_MEDIA_MODELS = [
+  DEFAULT_MODEL,
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash",
+  "gemini-2.0-flash-lite"
+];
+const DEFAULT_SOURCE_MODELS = [
+  DEFAULT_MODEL,
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash"
+];
 const DEFAULT_IMAGE_DAILY_LIMIT = 100;
 const DEFAULT_SOURCE_DAILY_LIMIT = 50;
 const DEFAULT_BOT_DAILY_LIMIT = 80;
@@ -14,9 +25,12 @@ const DEFAULT_VIDEO_DAILY_LIMIT = 40;
 const PROVIDER_RESET_TIME_ZONE = "America/Los_Angeles";
 const GEMINI_QUOTA_COOLDOWN_MS = 30 * 60 * 1000;
 const GEMINI_INVALID_KEY_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+const GEMINI_HIGH_DEMAND_COOLDOWN_MS = 10 * 60 * 1000;
+const GEMINI_UNSUPPORTED_MODEL_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
 let nextGeminiKeyIndex = 0;
 const geminiKeyCooldowns = new Map();
+const geminiModelCooldowns = new Map();
 
 const MEDIA_SCHEMA = {
   type: "object",
@@ -192,7 +206,11 @@ export default {
           label: "Imagem",
           prompt: IMAGE_SYSTEM_PROMPT,
           schema: MEDIA_SCHEMA,
-          model: env.GEMINI_IMAGE_MODEL || DEFAULT_MODEL,
+          models: getGeminiModelCandidates(env, {
+            listEnvName: "GEMINI_IMAGE_MODELS",
+            singleEnvName: "GEMINI_IMAGE_MODEL",
+            defaults: DEFAULT_MEDIA_MODELS
+          }),
           maxSizeBytes: 8 * 1024 * 1024,
           expectedMimePrefix: "image/",
           defaultMimeType: "image/jpeg",
@@ -218,7 +236,11 @@ export default {
           label: "Musica",
           prompt: AUDIO_SYSTEM_PROMPT,
           schema: MEDIA_SCHEMA,
-          model: env.GEMINI_AUDIO_MODEL || DEFAULT_MODEL,
+          models: getGeminiModelCandidates(env, {
+            listEnvName: "GEMINI_AUDIO_MODELS",
+            singleEnvName: "GEMINI_AUDIO_MODEL",
+            defaults: DEFAULT_MEDIA_MODELS
+          }),
           maxSizeBytes: 20 * 1024 * 1024,
           expectedMimePrefix: "audio/",
           defaultMimeType: "audio/mpeg",
@@ -244,7 +266,11 @@ export default {
           label: "Video",
           prompt: VIDEO_SYSTEM_PROMPT,
           schema: MEDIA_SCHEMA,
-          model: env.GEMINI_VIDEO_MODEL || DEFAULT_MODEL,
+          models: getGeminiModelCandidates(env, {
+            listEnvName: "GEMINI_VIDEO_MODELS",
+            singleEnvName: "GEMINI_VIDEO_MODEL",
+            defaults: DEFAULT_MEDIA_MODELS
+          }),
           maxSizeBytes: 20 * 1024 * 1024,
           expectedMimePrefix: "video/",
           defaultMimeType: "video/mp4",
@@ -306,7 +332,7 @@ async function handleMediaAnalysis(request, env, config) {
   }
 
   const base64 = arrayBufferToBase64(await file.arrayBuffer());
-  const response = await callGemini(env, config.model, {
+  const response = await callGemini(env, config.models, {
     systemInstruction: {
       parts: [{ text: config.prompt }]
     },
@@ -333,7 +359,7 @@ async function handleMediaAnalysis(request, env, config) {
     }
   });
 
-  const analysis = parseGeminiJson(response);
+  const analysis = parseGeminiJson(response.data);
   const verdictMap = mapMediaVerdict(analysis.verdict);
 
   return jsonResponse({
@@ -342,7 +368,8 @@ async function handleMediaAnalysis(request, env, config) {
     label: `${config.label}: ${file.name} - ${formatBytes(file.size)}`,
     confidence: normalizeConfidence(analysis.confidence),
     text: analysis.summary,
-    points: normalizeList(analysis.signals)
+    points: normalizeList(analysis.signals),
+    model: response.model
   });
 }
 
@@ -354,7 +381,11 @@ async function handleBotAnalysis(request, env) {
     return jsonResponse({ error: "Envie um link, handle ou identificador para verificar o bot." }, 400);
   }
 
-  const response = await callGemini(env, env.GEMINI_BOT_MODEL || DEFAULT_MODEL, {
+  const response = await callGemini(env, getGeminiModelCandidates(env, {
+    listEnvName: "GEMINI_BOT_MODELS",
+    singleEnvName: "GEMINI_BOT_MODEL",
+    defaults: DEFAULT_MEDIA_MODELS
+  }), {
     systemInstruction: {
       parts: [{ text: BOT_SYSTEM_PROMPT }]
     },
@@ -378,7 +409,7 @@ async function handleBotAnalysis(request, env) {
     }
   });
 
-  const analysis = parseGeminiJson(response);
+  const analysis = parseGeminiJson(response.data);
   const verdictMap = mapBotVerdict(analysis.verdict);
 
   return jsonResponse({
@@ -387,7 +418,8 @@ async function handleBotAnalysis(request, env) {
     label: "Perfil analisado",
     confidence: normalizeConfidence(analysis.confidence),
     text: analysis.summary,
-    points: normalizeList(analysis.signals)
+    points: normalizeList(analysis.signals),
+    model: response.model
   });
 }
 
@@ -401,9 +433,13 @@ async function handleSourceAnalysis(request, env) {
 
   const normalizedUrl = normalizeUrl(link);
   const pageData = await fetchPageSnapshot(normalizedUrl);
-  const model = env.GEMINI_SOURCE_MODEL || DEFAULT_MODEL;
+  const modelCandidates = getGeminiModelCandidates(env, {
+    listEnvName: "GEMINI_SOURCE_MODELS",
+    singleEnvName: "GEMINI_SOURCE_MODEL",
+    defaults: DEFAULT_SOURCE_MODELS
+  });
 
-  const groundedResponse = await callGemini(env, model, {
+  const groundedResponse = await callGemini(env, modelCandidates, {
     systemInstruction: {
       parts: [{ text: SOURCE_GROUNDED_PROMPT }]
     },
@@ -423,10 +459,10 @@ async function handleSourceAnalysis(request, env) {
     }
   });
 
-  const groundedText = getGeminiText(groundedResponse);
-  const groundingMeta = getGroundingMetadata(groundedResponse);
+  const groundedText = getGeminiText(groundedResponse.data);
+  const groundingMeta = getGroundingMetadata(groundedResponse.data);
 
-  const classifierResponse = await callGemini(env, model, {
+  const classifierResponse = await callGemini(env, modelCandidates, {
     systemInstruction: {
       parts: [{ text: SOURCE_CLASSIFIER_PROMPT }]
     },
@@ -443,7 +479,7 @@ async function handleSourceAnalysis(request, env) {
     }
   });
 
-  const analysis = parseGeminiJson(classifierResponse);
+  const analysis = parseGeminiJson(classifierResponse.data);
   const verdictMap = mapSourceVerdict(analysis.verdict);
 
   return jsonResponse({
@@ -452,7 +488,8 @@ async function handleSourceAnalysis(request, env) {
     label: `Dominio: ${pageData.domain}`,
     confidence: normalizeConfidence(analysis.confidence),
     text: analysis.summary,
-    points: mergeReasonsWithSources(analysis.reasons, groundingMeta)
+    points: mergeReasonsWithSources(analysis.reasons, groundingMeta),
+    model: classifierResponse.model
   });
 }
 
@@ -498,83 +535,175 @@ async function enforceRateLimit(request, env, scope, limit) {
   }, 429);
 }
 
-async function callGemini(env, model, payload) {
+async function callGemini(env, models, payload) {
   const configuredKeys = getGeminiApiKeys(env);
+  const configuredModels = getGeminiModelOrder(
+    Array.isArray(models) && models.length ? models : [DEFAULT_MODEL]
+  );
 
   if (!configuredKeys.length) {
     throw new Error("Nenhuma chave Gemini configurada no backend.");
   }
 
-  const orderedKeys = getGeminiKeyOrder(configuredKeys);
+  if (!configuredModels.length) {
+    throw new Error("Nenhum modelo Gemini configurado no backend.");
+  }
+
   let lastErrorMessage = "Falha ao consultar a API Gemini.";
+  let lastFailureReason = "";
 
-  for (const apiKey of orderedKeys) {
-    let response;
+  for (const model of configuredModels) {
+    const orderedKeys = getGeminiKeyOrder(configuredKeys);
 
-    try {
-      response = await fetch(`${GEMINI_API_BASE}/${model}:generateContent`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey
-        },
-        body: JSON.stringify(payload)
-      });
-    } catch (error) {
-      throw new Error("Nao foi possivel conectar a API Gemini.");
-    }
+    for (const apiKey of orderedKeys) {
+      let response;
 
-    const data = await response.json().catch(() => null);
+      try {
+        response = await fetch(`${GEMINI_API_BASE}/${model}:generateContent`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey
+          },
+          body: JSON.stringify(payload)
+        });
+      } catch (error) {
+        throw new Error("Nao foi possivel conectar a API Gemini.");
+      }
 
-    if (response.ok) {
-      markGeminiKeySuccess(apiKey, configuredKeys);
-      return data;
-    }
+      const data = await response.json().catch(() => null);
 
-    const interpretedError = interpretGeminiError(data);
-    lastErrorMessage = interpretedError.message;
+      if (response.ok) {
+        markGeminiKeySuccess(apiKey, configuredKeys);
+        clearGeminiModelCooldown(model);
 
-    if (!interpretedError.shouldRotate || orderedKeys.length === 1) {
+        return {
+          data,
+          model
+        };
+      }
+
+      const interpretedError = interpretGeminiError(response, data);
+      lastErrorMessage = interpretedError.message;
+      lastFailureReason = interpretedError.reason;
+
+      if (interpretedError.retryWithAnotherKey) {
+        markGeminiKeyCooldown(apiKey, interpretedError.cooldownMs);
+      }
+
+      if (interpretedError.retryWithAnotherModel) {
+        markGeminiModelCooldown(model, interpretedError.modelCooldownMs);
+        break;
+      }
+
+      if (interpretedError.retryWithAnotherKey && orderedKeys.length > 1) {
+        continue;
+      }
+
       throw new Error(interpretedError.message);
     }
 
-    markGeminiKeyCooldown(apiKey, interpretedError.cooldownMs);
+    if (!hasActiveGeminiKey(configuredKeys) && lastFailureReason !== "high_demand" && lastFailureReason !== "unsupported_model") {
+      break;
+    }
+  }
+
+  if (lastFailureReason === "high_demand") {
+    throw new Error("Os modelos Gemini configurados estao em alta demanda no momento. Tente novamente em instantes.");
+  }
+
+  if (lastFailureReason === "unsupported_model") {
+    throw new Error("Os modelos Gemini configurados nao estao disponiveis para este tipo de analise.");
   }
 
   throw new Error(lastErrorMessage);
 }
 
-function interpretGeminiError(data) {
+function interpretGeminiError(response, data) {
+  const status = Number(response?.status) || 500;
   const message = data?.error?.message || "Falha ao consultar a API Gemini.";
+  const normalizedMessage = String(message).toLowerCase();
 
-  if (message.includes("API key not valid")) {
+  if (normalizedMessage.includes("api key not valid")) {
     return {
       message: "Uma das chaves do Gemini e invalida. Trocando para a proxima chave configurada.",
-      shouldRotate: true,
+      reason: "invalid_key",
+      retryWithAnotherKey: true,
+      retryWithAnotherModel: false,
       cooldownMs: GEMINI_INVALID_KEY_COOLDOWN_MS
     };
   }
 
-  if (message.includes("quota") || message.includes("Quota") || message.includes("RESOURCE_EXHAUSTED")) {
+  if (
+    normalizedMessage.includes("quota")
+    || normalizedMessage.includes("resource_exhausted")
+    || normalizedMessage.includes("rate limit")
+  ) {
     return {
       message: "A cota gratuita do Gemini foi excedida para a chave atual. Tentando outra chave configurada.",
-      shouldRotate: true,
+      reason: "quota",
+      retryWithAnotherKey: true,
+      retryWithAnotherModel: false,
       cooldownMs: GEMINI_QUOTA_COOLDOWN_MS
     };
   }
 
-  if (message.includes("API_KEY_SERVICE_BLOCKED") || message.includes("permission") || message.includes("PERMISSION_DENIED")) {
+  if (
+    normalizedMessage.includes("currently experiencing high demand")
+    || normalizedMessage.includes("high demand")
+    || normalizedMessage.includes("temporarily unavailable")
+    || normalizedMessage.includes("model is overloaded")
+    || normalizedMessage.includes("unavailable")
+    || status === 503
+  ) {
+    return {
+      message: "O modelo atual do Gemini esta em alta demanda. Tentando um fallback menos concorrido.",
+      reason: "high_demand",
+      retryWithAnotherKey: false,
+      retryWithAnotherModel: true,
+      cooldownMs: 0,
+      modelCooldownMs: GEMINI_HIGH_DEMAND_COOLDOWN_MS
+    };
+  }
+
+  if (
+    normalizedMessage.includes("not found for api version")
+    || normalizedMessage.includes("is not found")
+    || normalizedMessage.includes("is not supported for generatecontent")
+    || normalizedMessage.includes("unsupported model")
+    || (status === 404 && normalizedMessage.includes("model"))
+  ) {
+    return {
+      message: "O modelo Gemini configurado nao esta disponivel para este metodo. Tentando outro modelo.",
+      reason: "unsupported_model",
+      retryWithAnotherKey: false,
+      retryWithAnotherModel: true,
+      cooldownMs: 0,
+      modelCooldownMs: GEMINI_UNSUPPORTED_MODEL_COOLDOWN_MS
+    };
+  }
+
+  if (
+    normalizedMessage.includes("api_key_service_blocked")
+    || normalizedMessage.includes("permission")
+    || normalizedMessage.includes("permission_denied")
+  ) {
     return {
       message: "Uma das chaves do Gemini nao tem permissao para este modelo ou metodo. Trocando para a proxima chave.",
-      shouldRotate: true,
+      reason: "permission",
+      retryWithAnotherKey: true,
+      retryWithAnotherModel: false,
       cooldownMs: GEMINI_INVALID_KEY_COOLDOWN_MS
     };
   }
 
   return {
     message,
-    shouldRotate: false,
-    cooldownMs: 0
+    reason: "generic",
+    retryWithAnotherKey: false,
+    retryWithAnotherModel: false,
+    cooldownMs: 0,
+    modelCooldownMs: 0
   };
 }
 
@@ -690,11 +819,24 @@ function getGeminiApiKeys(env) {
   const rawValues = [env.GEMINI_API_KEYS, env.GEMINI_API_KEY]
     .filter((value) => typeof value === "string" && value.trim());
 
-  const parsedKeys = rawValues.flatMap((value) => parseGeminiKeyValue(value));
+  const parsedKeys = rawValues.flatMap((value) => parseDelimitedConfigValue(value));
   return [...new Set(parsedKeys)];
 }
 
-function parseGeminiKeyValue(rawValue) {
+function getGeminiModelCandidates(env, options) {
+  const routeModels = parseDelimitedConfigValue(env[options.listEnvName]);
+
+  if (routeModels.length) {
+    return [...new Set(routeModels)];
+  }
+
+  const preferredModels = parseDelimitedConfigValue(env[options.singleEnvName]);
+  const sharedModels = parseDelimitedConfigValue(env.GEMINI_MODELS || env.GEMINI_MODEL);
+
+  return [...new Set([...preferredModels, ...sharedModels, ...options.defaults])];
+}
+
+function parseDelimitedConfigValue(rawValue) {
   const trimmed = String(rawValue || "").trim();
 
   if (!trimmed) {
@@ -750,6 +892,34 @@ function getGeminiKeyOrder(keys) {
   return [...available, ...coolingDown];
 }
 
+function getGeminiModelOrder(models) {
+  if (!models.length) {
+    return [];
+  }
+
+  const now = Date.now();
+  const available = [];
+  const coolingDown = [];
+
+  for (const model of models) {
+    const cooldownUntil = geminiModelCooldowns.get(model) || 0;
+
+    if (cooldownUntil > now) {
+      coolingDown.push(model);
+      continue;
+    }
+
+    available.push(model);
+  }
+
+  return [...available, ...coolingDown];
+}
+
+function hasActiveGeminiKey(keys) {
+  const now = Date.now();
+  return keys.some((key) => (geminiKeyCooldowns.get(key) || 0) <= now);
+}
+
 function markGeminiKeySuccess(apiKey, configuredKeys) {
   geminiKeyCooldowns.delete(apiKey);
 
@@ -762,6 +932,14 @@ function markGeminiKeySuccess(apiKey, configuredKeys) {
 
 function markGeminiKeyCooldown(apiKey, cooldownMs) {
   geminiKeyCooldowns.set(apiKey, Date.now() + cooldownMs);
+}
+
+function markGeminiModelCooldown(model, cooldownMs) {
+  geminiModelCooldowns.set(model, Date.now() + cooldownMs);
+}
+
+function clearGeminiModelCooldown(model) {
+  geminiModelCooldowns.delete(model);
 }
 
 function getDailyLimit(rawValue, fallback) {
